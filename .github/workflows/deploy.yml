@@ -18,23 +18,69 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
           cache-dependency-path: my-app/package-lock.json
-      - uses: actions/configure-pages@v5
-      - name: Install deps
+
+      - name: ⚙️ Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: 🧭 Show repo tree (top-level)
+        run: |
+          pwd
+          ls -la
+
+      - name: 🧭 Show app tree (my-app/)
+        run: |
+          ls -la my-app
+          test -f my-app/package.json || (echo "❌ my-app/package.json not found" && exit 1)
+
+      - name: 🔎 Print homepage from my-app/package.json
+        run: |
+          node -e "const p=require('./my-app/package.json'); console.log('homepage:', p.homepage || '(none)')"
+
+      - name: 📦 Install deps
         working-directory: my-app
         run: npm ci
-      - name: Build
+
+      # Force the correct base path no matter what. Adjust to your repo name if different.
+      - name: 🏗️ Build (force PUBLIC_URL)
         working-directory: my-app
+        env:
+          PUBLIC_URL: /CS409-MP2
         run: npm run build
-      - name: Upload artifact
+
+      - name: 🔍 Inspect build output
+        run: |
+          echo "---- build root ----"
+          ls -la my-app/build
+          echo "---- asset-manifest.json (first 40 lines) ----"
+          head -n 40 my-app/build/asset-manifest.json || true
+          echo "---- index.html (first 60 lines) ----"
+          head -n 60 my-app/build/index.html || true
+
+      - name: ✅ Validate base path in build
+        run: |
+          # Must contain /CS409-MP2 and must NOT contain /mp2
+          grep -R "/CS409-MP2" my-app/build/index.html my-app/build/asset-manifest.json > /dev/null || (echo "❌ Build not using /CS409-MP2 base path" && exit 1)
+          if grep -R "/mp2" my-app/build/index.html my-app/build/asset-manifest.json; then
+            echo "❌ Found wrong base path /mp2 in build artifacts"
+            exit 1
+          else
+            echo "✅ Base path looks correct"
+          fi
+
+      - name: ⬆️ Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: my-app/build
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
