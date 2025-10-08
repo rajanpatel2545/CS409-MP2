@@ -19,6 +19,8 @@
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
+  "homepage": "https://rajanpatel2545.github.io/mp2",
+
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
