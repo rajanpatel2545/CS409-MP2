@@ -351,7 +351,6 @@ function DetailView() {
 
 // -------------------------------------------------------
 function App() {
-  const basename = process.env.PUBLIC_URL || "/mp2"; // set to "/<your-repo>" for GitHub Pages
 
   return (
       <BrowserRouter basename={process.env.PUBLIC_URL}>
