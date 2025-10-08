@@ -18,34 +18,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
           cache-dependency-path: my-app/package-lock.json
-
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-
-      - name: Install dependencies
+      - uses: actions/configure-pages@v5
+      - name: Install deps
         working-directory: my-app
         run: npm ci
-
-      - name: Build site
+      - name: Build
         working-directory: my-app
-        # Let CRA derive PUBLIC_URL from package.json "homepage".
-        # If you want to force it via env, set it to /CS409-MP2 (NOT /mp2).
         run: npm run build
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: my-app/build
-
   deploy:
     needs: build
     runs-on: ubuntu-latest
